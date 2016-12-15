@@ -16,8 +16,5 @@ namespace SmarterBalanced.SampleItems.Dal.Xml.Models
 
         [XmlElement("val")]
         public string Value { get; set; }
-
-
-
     }
 }

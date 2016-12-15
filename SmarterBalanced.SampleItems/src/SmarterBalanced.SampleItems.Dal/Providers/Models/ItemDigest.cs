@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using SmarterBalanced.SampleItems.Dal.Providers.Models;
+
 namespace SmarterBalanced.SampleItems.Dal.Providers.Models
 {
     /// <summary>
@@ -18,5 +19,6 @@ namespace SmarterBalanced.SampleItems.Dal.Providers.Models
         public string Title { get; set; }
         public Subject Subject { get; set; }
         public Claim Claim { get; set; }
+        public List<Content> Contents { get; set; }
     }
 }

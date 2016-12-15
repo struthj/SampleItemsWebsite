@@ -57,6 +57,10 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
             digest.BankKey = itemContents.Item.ItemBank;
             digest.ItemKey = itemContents.Item.ItemKey;
             digest.ItemType = itemContents.Item.ItemType;
+            
+            // TODO: may want to refactor/translate contents to better suit digest's needs
+            digest.Contents = itemContents.Item.Contents;
+
             digest.TargetAssessmentType = itemMetadata.Metadata.TargetAssessmentType; 
             digest.SubjectId = itemMetadata.Metadata.Subject;
             digest.InteractionTypeCode = itemMetadata.Metadata.InteractionType;
