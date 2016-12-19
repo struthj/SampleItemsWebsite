@@ -52,7 +52,7 @@
             this.accessibilityResourceViewModels = accessibilityResourceViewModels;
         }
         getAccessibilityString(): string {
-            let str: string = "";
+            let str: string = "?isaap=";
             for (let res of this.accessibilityResourceViewModels) {
                 if (res.selectedCode) {
                     str = str.concat(res.selectedCode, ";");
@@ -105,6 +105,10 @@
                 url: props.baseUrl + props.accessibilityString,
                 accessibilityString: props.accessibilityString,
             }
+        }
+
+        createUrl(baseUrl: string, bank: string, item: string, accessibilityString: string): string {
+            return baseUrl.concat("/item/", bank, "-", item, accessibilityString);
         }
 
         render() {

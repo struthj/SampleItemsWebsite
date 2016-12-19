@@ -60,6 +60,23 @@ namespace SmarterBalanced.SampleItems.Core.Repos
         }
 
         /// <summary>
+        /// Constructs an itemviewerservice URL to access the 
+        /// item corresponding to the given ItemDigest.
+        /// </summary>
+        /// <param name="digest"></param>
+        /// <returns>a string URL.</returns>
+        private string GetItemViewerUrl(ItemDigest digest)
+        {
+            if (digest == null)
+            {
+                return string.Empty;
+            }
+
+            string baseUrl = context.AppSettings.SettingsConfig.ItemViewerServiceURL;
+            return $"{baseUrl}/item/{digest.BankKey}-{digest.ItemKey}";
+        }
+
+        /// <summary>
         /// Gets the item digest's accessibility resources as a viewmodel
         /// </summary>
         /// <param name="itemDigest"></param>
@@ -131,7 +148,7 @@ namespace SmarterBalanced.SampleItems.Core.Repos
             {
                 itemView = new ItemViewModel();
                 itemView.ItemDigest = itemDigest;
-                itemView.ItemViewerServiceUrl = GetItemViewerUrl(itemView.ItemDigest, iSAAP);
+                itemView.ItemViewerServiceUrl = GetItemViewerUrl(itemDigest);
 
                 var accResourceVMs = await GetAccessibilityResourceViewModels(itemDigest?.AccessibilityResources, iSAAP);
                 itemView.LocalAccessibilityViewModel = await GetLocalAccessibilityResourcesAsync(accResourceVMs);
