@@ -12,16 +12,6 @@
 
 <hr/>
 
-<div class="row">
-
-    <div class="col-lg-12 col-md-12 col-sm-12">
-        <iframe id="itemviewer-iframe" class="itemviewer-iframe" src="@Model.ItemViewerServiceUrl"></iframe>
-        <div class="accessibilityButton">
-            <button href="" data-toggle="modal" data-target="#accessibility" class="btn-lg">Local Accessibility</button>
-        </div>
-    </div>
-</div>
-
 <div id="viewMore" class="modal fade" role="dialog">
     <div class="modal-dialog">
 
@@ -79,12 +69,16 @@
     </div>
 </div>
 
-<script src="~/scripts/ItemAccessibility.js"></script>
+<div id="item-container"></div>
 
+@section Scripts {
+<script src="~/scripts/ItemAccessibility.js"></script>
+<script src="~/scripts/ItemPage.js"></script>
 <script>
     var url = '@Html.Raw(Url.Action("ResetToGlobalAccessibility", "Item",
         new { bankKey = Model.ItemDigest.BankKey, itemKey = Model.ItemDigest.ItemKey }))';
 
     initializeItemAccessibility(url);
-    intializeAccessiblityOptions(@Json.Serialize(Model));
+    initializeItemPage(@Json.Serialize(Model));
 </script>
+}
