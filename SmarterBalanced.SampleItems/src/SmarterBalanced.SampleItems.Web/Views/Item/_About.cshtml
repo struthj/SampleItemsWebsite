@@ -1,0 +1,36 @@
+﻿@using SmarterBalanced.SampleItems.Dal.Providers.Models
+@model List<Rubric>
+
+@foreach (var rubric in Model)
+{
+    <h2>@rubric.Language Rubric</h2>
+    
+    <h3>Rubrics</h3><br />
+    @foreach (var rubricEntry in @rubric.RubricsEntries)
+    {
+        <h4>@rubricEntry.Name</h4>
+        <span>Score Point: @rubricEntry.Scorepoint</span>
+        <br />
+        <span>Value: @Html.Raw(@rubricEntry.Value)</span>
+        <br />
+    }
+
+    <br />
+    <br />
+
+    <h3>Samples</h3>
+    @foreach (var sampleList in @rubric.Samples)
+    {
+        <h4>Max Points, Min Points: @sampleList.MaxValue, @sampleList.MinValue</h4>
+
+        @foreach (var sample in @sampleList.SampleResponses)
+        {
+            <h5>@sample.Name</h5>
+            <span>Score Point: @sample.ScorePoint</span>
+            <br />
+            <span>Purpose: @sample.Purpose</span>
+            <br />
+            <span>@Html.Raw(sample.SampleContent)</span>
+        }
+    }
+}

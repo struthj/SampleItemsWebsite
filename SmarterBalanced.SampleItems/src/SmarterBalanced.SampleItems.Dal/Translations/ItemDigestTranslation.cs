@@ -58,8 +58,7 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
             digest.ItemKey = itemContents.Item.ItemKey;
             digest.ItemType = itemContents.Item.ItemType;
             
-            // TODO: may want to refactor/translate contents to better suit digest's needs
-            digest.Contents = itemContents.Item.Contents;
+            digest.Rubrics = itemContents.Item.Contents.ToRubric();
 
             digest.TargetAssessmentType = itemMetadata.Metadata.TargetAssessmentType; 
             
@@ -84,6 +83,29 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
             digest.AccessibilityResources = resourceFamilies.FirstOrDefault(t => t.Subjects.Any(c => c == subjectId) && t.Grades.Contains(digest.Grade))?.Resources;
 
             return digest;
+        }
+
+        /// <summary>
+        /// Converts item XML Contents into Rubrics.
+        /// </summary>
+        /// <param name="contents"></param>
+        /// <returns>List<Rubric>.</returns>
+        public static List<Rubric> ToRubric(this List<XmlModels.Content> contents)
+        {
+            List<Rubric> rubrics = new List<Rubric>();
+
+            foreach(var content in contents)
+            {
+                rubrics.Add(
+                    new Rubric
+                    {
+                        Language = content?.Language,
+                        RubricsEntries = content?.RubricList?.Rubrics,
+                        Samples = content?.RubricList?.RubricSamples
+                    });
+            }
+
+            return rubrics;
         }
 
         /// <summary>

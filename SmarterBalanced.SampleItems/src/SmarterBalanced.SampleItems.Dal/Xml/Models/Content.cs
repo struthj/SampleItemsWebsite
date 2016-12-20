@@ -12,7 +12,7 @@ namespace SmarterBalanced.SampleItems.Dal.Xml.Models
         public string Language { get; set; }
 
         [XmlElement("rubriclist")]
-        public List<RubricList> RubricList { get; set; }
+        public RubricList RubricList { get; set; }
 
         [XmlArray("attachmentlist")]
         [XmlArrayItem("attachment")]

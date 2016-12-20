@@ -9,9 +9,9 @@ namespace SmarterBalanced.SampleItems.Dal.Xml.Models
     public class RubricList
     {
         [XmlElement("rubric")]
-        public List<Rubric> Rubrics { get; set; }
+        public List<RubricEntry> Rubrics { get; set; }
 
         [XmlElement("samplelist")]
-        public List<SampleList> SampleLists { get; set; }
+        public List<RubricSample> RubricSamples { get; set; }
     }
 }

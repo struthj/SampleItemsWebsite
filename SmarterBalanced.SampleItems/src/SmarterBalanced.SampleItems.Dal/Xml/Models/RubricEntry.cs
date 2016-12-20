@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 namespace SmarterBalanced.SampleItems.Dal.Xml.Models
 {
-    public class Rubric
+    public class RubricEntry
     {
         [XmlAttribute("scorepoint")]
         public string Scorepoint { get; set; }

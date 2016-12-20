@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 namespace SmarterBalanced.SampleItems.Dal.Xml.Models
 {
-    public class SampleList
+    public class RubricSample
     {
         [XmlAttribute("maxval")]
         public string MaxValue { get; set; }
