@@ -18,11 +18,7 @@ namespace SmarterBalanced.SampleItems.Core.Repos
         {
             this.context = context;
         }
-
-        /// <summary>
-        /// Gets AppSettings
-        /// </summary>
-        /// <returns></returns>
+        
         public AppSettings AppSettings
         {
             get
@@ -30,24 +26,16 @@ namespace SmarterBalanced.SampleItems.Core.Repos
                 return context.AppSettings;
             }
         }
-
-        /// <summary>
-        /// Retrieves an ItemDigest matching the given bankKey and itemKey.
-        /// </summary>
-        /// <param name="bankKey"></param>
-        /// <param name="itemKey"></param>
-        /// <returns>an ItemDigest object.</returns>
-        public Task<ItemDigest> GetItemDigestAsync(int bankKey, int itemKey)
+        
+        public ItemDigest GetItemDigest(int bankKey, int itemKey)
         {
-            return Task.Run(() => context.ItemDigests.SingleOrDefault(item => item.BankKey == bankKey && item.ItemKey == itemKey));
+            return context.ItemDigests.SingleOrDefault(item => item.BankKey == bankKey && item.ItemKey == itemKey);
         }
 
         /// <summary>
         /// Constructs an itemviewerservice URL to access the 
         /// item corresponding to the given ItemDigest.
         /// </summary>
-        /// <param name="digest"></param>
-        /// <returns>a string URL.</returns>
         private string GetItemViewerUrl(ItemDigest digest, string iSAAPcode)
         {
             if (digest == null)
@@ -63,8 +51,6 @@ namespace SmarterBalanced.SampleItems.Core.Repos
         /// Constructs an itemviewerservice URL to access the 
         /// item corresponding to the given ItemDigest.
         /// </summary>
-        /// <param name="digest"></param>
-        /// <returns>a string URL.</returns>
         private string GetItemViewerUrl(ItemDigest digest)
         {
             if (digest == null)
@@ -75,84 +61,30 @@ namespace SmarterBalanced.SampleItems.Core.Repos
             string baseUrl = context.AppSettings.SettingsConfig.ItemViewerServiceURL;
             return $"{baseUrl}/item/{digest.BankKey}-{digest.ItemKey}";
         }
-
-        /// <summary>
-        /// Gets the item digest's accessibility resources as a viewmodel
-        /// </summary>
-        /// <param name="itemDigest"></param>
-        /// <returns>List of accessibility resource family</returns>
-        private Task<List<AccessibilityResourceViewModel>> GetAccessibilityResourceViewModels(List<AccessibilityResource> accResources, string iSAAPCode)
+        
+        /// <returns>
+        /// An ItemViewModel instance, or null if no item exists with
+        /// the given combination of bankKey and itemKey.
+        /// </returns>
+        public ItemViewModel GetItemViewModel(int bankKey, int itemKey, string iSAAP = null)
         {
-            return Task.Run(() =>  accResources.ToAccessibilityResourceViewModels(iSAAPCode));
-        }
+            iSAAP = iSAAP ?? string.Empty;
+            ItemDigest itemDigest = GetItemDigest(bankKey, itemKey);
+            if (itemDigest == null)
+                return null;
+            
+            var viewerUrl = GetItemViewerUrl(itemDigest);
+            var accResourceVMs = itemDigest.AccessibilityResources.ToAccessibilityResourceViewModels(iSAAP);
+            var filteredVMs = accResourceVMs
+                .Where(t => !t.Disabled && !t.Selections.All(s => s.Disabled))
+                .ToList();
 
-        /// <summary>
-        /// Constructs a LocalAccessibilityViewModel using AccessiblityResourceViewModels
-        /// </summary>
-        /// <param name="accResourceViewModels"></param>
-        private Task<LocalAccessibilityViewModel> GetLocalAccessibilityResourcesAsync(List<AccessibilityResourceViewModel> accResourceViewModels)
-        {
-            return Task.Run(() =>
+            var itemView = new ItemViewModel
             {
-                LocalAccessibilityViewModel localAccViewModel = new LocalAccessibilityViewModel();
-
-                List<AccessibilityResourceViewModel> nonApplicableResources = accResourceViewModels
-                                         .Where(t => t.Disabled || t.AccessibilityListItems.TrueForAll(s => s.Disabled)).ToList();
-
-                localAccViewModel.AccessibilityResourceViewModels = accResourceViewModels
-                                        .Where(t => !nonApplicableResources.Contains(t))
-                                        .ToList();
-
-                localAccViewModel.NonApplicableAccessibilityResources = ConcatAccessibilityResources(nonApplicableResources);
-
-                return localAccViewModel;
-            });
-
-        }
-
-        /// <summary>
-        /// Joins accessibility resource view model labels into 
-        /// a comma-separated string
-        /// </summary>
-        /// <param name="accResourceViewModels"></param>
-        private string ConcatAccessibilityResources(List<AccessibilityResourceViewModel> accResourceViewModels)
-        {
-            List<string> labels = accResourceViewModels.Select(t => t.Label).ToList();
-            return string.Join(", ", labels);
-        }
-
-        /// <summary>
-        /// Constructs an ItemViewModel with an ItemViewerService URL.
-        /// </summary>
-        /// <param name="bankKey"></param>
-        /// <param name="itemKey"></param>
-        /// <returns>an ItemViewModel.</returns>
-        public Task<ItemViewModel> GetItemViewModelAsync(int bankKey, int itemKey)
-        {
-            return GetItemViewModelAsync(bankKey, itemKey, string.Empty);
-        }
-
-        /// <summary>
-        /// Constructs an ItemViewModel with an ItemDigest, ItemViewerServiceURL,
-        /// and accessibiltiyResources
-        /// </summary>
-        /// <param name="bankKey"></param>
-        /// <param name="itemKey"></param>
-        /// <returns>an ItemViewModel.</returns>
-        public async Task<ItemViewModel> GetItemViewModelAsync(int bankKey, int itemKey, string iSAAP)
-        {
-            ItemViewModel itemView = null;
-            ItemDigest itemDigest = await GetItemDigestAsync(bankKey, itemKey);
-
-            if (itemDigest != null)
-            {
-                itemView = new ItemViewModel();
-                itemView.ItemDigest = itemDigest;
-                itemView.ItemViewerServiceUrl = GetItemViewerUrl(itemDigest);
-
-                var accResourceVMs = await GetAccessibilityResourceViewModels(itemDigest?.AccessibilityResources, iSAAP);
-                itemView.LocalAccessibilityViewModel = await GetLocalAccessibilityResourcesAsync(accResourceVMs);
-            }
+                ItemDigest = itemDigest,
+                ItemViewerServiceUrl = GetItemViewerUrl(itemDigest),
+                AccResourceVMs = filteredVMs
+            };
 
             return itemView;
         }

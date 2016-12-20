@@ -36,13 +36,13 @@ namespace SmarterBalanced.SampleItems.Test.WebTests.ControllerTests
                     {
                         Label = "Test1",
                         Disabled = false,
-                        AccessibilityListItems = new List<SelectListItem>()
+                        Selections = new List<AccessibilitySelectionViewModel>()
                     },
                     new AccessibilityResourceViewModel()
                     {
                         Label = "Test2",
                         Disabled = false,
-                        AccessibilityListItems = new List<SelectListItem>()
+                        Selections = new List<AccessibilitySelectionViewModel>()
                     }
                 }
             };

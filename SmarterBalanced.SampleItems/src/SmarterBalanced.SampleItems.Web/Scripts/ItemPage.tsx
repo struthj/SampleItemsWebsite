@@ -1,17 +1,20 @@
 ﻿namespace ItemPage {
-    interface ModalProps {
-        localAccessibility: AccessibilityResourceViewModel[];
-    }
 
     export interface ItemViewModel {
         itemViewerServiceUrl: string;
         itemDigest: ItemDigest;
-        localAccessibilityViewModel: LocalAccessibilityViewModel;
+        accResourceVMs: AccessibilityResourceViewModel[];
     }
 
-    export interface LocalAccessibilityViewModel {
-        nonApplicableAccessibilityResources: string;
-        accessibilityResourceViewModels: AccessibilityResourceViewModel[];
+    function getAccessibilityString(accResourceVM: AccessibilityResourceViewModel[]): string {
+        let str: string = "?isaap=";
+        for (let res of accResourceVM) {
+            if (res.selectedCode) {
+                str = str.concat(res.selectedCode, ";");
+            }
+        }
+        console.log(str);
+        return str;
     }
 
     interface AccessibilityResourceViewModel {
@@ -20,18 +23,10 @@
         disabled: boolean;
         label: string;
         selectedCode: string;
-        accessibilityListItems: Selection[];
+        selections: Selection[];
     }
 
-    interface Selection {
-        disabled: boolean;
-        selected: boolean;
-        label: string;
-    }
 
-    interface PageState {
-        accessibilityResource: AccessibilityResource;
-    }
 
     interface FrameProps {
         baseUrl: string;
@@ -43,31 +38,21 @@
         accessibilityString: string;
     }
 
-    class AccessibilityResource implements LocalAccessibilityViewModel {
-        nonApplicableAccessibilityResources: string;
-        accessibilityResourceViewModels: AccessibilityResourceViewModel[];
-        constructor(nonApplicableAccessibilityResources: string,
-            accessibilityResourceViewModels: AccessibilityResourceViewModel[]) {
-            this.nonApplicableAccessibilityResources = nonApplicableAccessibilityResources;
-            this.accessibilityResourceViewModels = accessibilityResourceViewModels;
-        }
-        getAccessibilityString(): string {
-            let str: string = "?isaap=";
-            for (let res of this.accessibilityResourceViewModels) {
-                if (res.selectedCode) {
-                    str = str.concat(res.selectedCode, ";");
-                }
-            }
-            console.log(str);
-            return str;
-        }
+    interface ModalProps {
+        localAccessibility: AccessibilityResourceViewModel[];
     }
 
+    interface ModalState {
+        localAccessibility: AccessibilityResourceViewModel[];
+    }
 
-    class ItemAccessibilityModal extends React.Component<ModalProps, {}> {
-        
-        constructor() {
-            super();
+    class ItemAccessibilityModal extends React.Component<ModalProps, ModalState> {
+
+        constructor(props: ModalProps) {
+            super(props);
+            this.state = {
+                localAccessibility: props.localAccessibility,
+            }
         }
 
         resetOptions() : void {
@@ -78,8 +63,54 @@
             //Update Cookie with current options
         }
 
+        onChange(selection: Selection): void {
+            console.log("I got a selection!");
+            console.log(selection);
+        }
+
         render() {
-            return (<p>the modal</p>);
+            let dropdowns = this.state.localAccessibility.map(res => {
+                let ddprops: DropdownProps = {
+                    defaultSelection: res.selectedCode,
+                    label: res.label,
+                    selections: res.selections,
+                    onChange: this.onChange
+                }
+                return <DropDown{...ddprops}/>;
+            });
+
+            return (
+                <div className="modal fade" id="modal-container" tabIndex={-1} role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 className="modal-title" id="myModalLabel">Modal title</h4>
+                            </div>
+                            <div className="modal-body">
+                                <div id="accessibility-dropdowns">
+                                    <div>
+                                        {dropdowns}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button onClick={this.saveOptions} className="btn btn-primary">Update</button>
+                                <button onClick={this.resetOptions} className="btn btn-primary">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                );
+        }
+    }
+
+    interface PageState {
+        // Given the name of a resource, returns the selected ISSAP code for the resource.
+        resourceSelections: {
+            [subject: string]: string | undefined;
         }
     }
 
@@ -87,14 +118,17 @@
         constructor(props: ItemViewModel) {
             super(props);
             this.state = {
-                accessibilityResource: new AccessibilityResource(
-                    props.localAccessibilityViewModel.nonApplicableAccessibilityResources,
-                    props.localAccessibilityViewModel.accessibilityResourceViewModels),
-            }
+                resourceSelections: {}
+            };
         }
         render() {
-            return (<ItemFrame baseUrl={this.props.itemViewerServiceUrl}
-                accessibilityString={this.state.accessibilityResource.getAccessibilityString()} />);
+            return (
+                <div>
+                    <ItemFrame baseUrl={this.props.itemViewerServiceUrl}
+                        accessibilityString={getAccessibilityString(this.props.accResourceVMs)} />
+                    <ItemAccessibilityModal localAccessibility={this.props.accResourceVMs} />
+                </div>
+            );
         }
     }
 
@@ -122,10 +156,7 @@
     }
 }
 
-function initializeItemPage(viewModel: {
-    itemViewerServiceUrl: string,
-    itemDigest: ItemDigest,
-    localAccessibilityViewModel: ItemPage.LocalAccessibilityViewModel}) {
+function initializeItemPage(viewModel: ItemPage.ItemViewModel) {
     ReactDOM.render(<ItemPage.Page {...viewModel} />,
         document.getElementById("item-container") as HTMLElement);
 }

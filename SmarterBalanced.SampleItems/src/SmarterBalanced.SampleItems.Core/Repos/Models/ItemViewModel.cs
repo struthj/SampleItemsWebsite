@@ -9,6 +9,6 @@ namespace SmarterBalanced.SampleItems.Core.Repos.Models
 
         public ItemDigest ItemDigest { get; set; }
 
-        public LocalAccessibilityViewModel LocalAccessibilityViewModel { get; set; }
+        public List<AccessibilityResourceViewModel> AccResourceVMs { get; set; }
     }
 }
