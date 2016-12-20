@@ -30,28 +30,17 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
                                                           .Elements("ResourceFamily")
                                                           .ToAccessibilityResourceFamilies(globalResources).ToList();
 
-
             // TODO: Refactor to method. is List<InteractionType> needed in the context?
             XElement interactionTypesDoc = XDocument
                 .Load(appSettings.SettingsConfig.InteractionTypesXMLPath)
                 .Element("InteractionTypes");
-            IList<InteractionType> interactionTypes = interactionTypesDoc.Element("Items").Elements("Item").ToInteractionTypes();
-            IList<InteractionFamily> interactionFamily = interactionTypesDoc.ToInteractionFamilies(interactionTypes);
+            List<InteractionType> interactionTypes = interactionTypesDoc.Element("Items").Elements("Item").ToInteractionTypes();
+            List<InteractionFamily> interactionFamily = interactionTypesDoc.ToInteractionFamilies();
 
-            IList<ItemDigest> itemDigests = await LoadItemDigests(appSettings, accessibilityResourceFamilies, interactionTypes);
+            List<Subject> subjects = XDocument.Load(appSettings.SettingsConfig.ClaimsXMLPath).ToSubjects(interactionFamily);
 
-            // TODO: get actual claims
-            IList<Claim> claims = new List<Claim>
-            {
-                new Claim { Code = "MATH1", Label = "Concepts and Procedures" },
-                new Claim { Code = "MATH2", Label = "Problem Solving and Modeling" },
-                new Claim { Code = "MATH3", Label = "Communicating Reasoning" },
-                new Claim { Code = "MATH4", Label = "Data Analysis" },
-                new Claim { Code = "ELA1", Label = "Reading" },
-                new Claim { Code = "ELA2", Label = "Writing" },
-                new Claim { Code = "ELA3", Label = "Listening" },
-                new Claim { Code = "ELA4", Label = "Research/Inquiry" }
-            };
+            List<ItemDigest> itemDigests = await LoadItemDigests(appSettings, accessibilityResourceFamilies, interactionTypes, subjects);
+            List<ItemCardViewModel> itemCards = itemDigests.Select(i => i.ToItemCardViewModel()).ToList();
 
             SampleItemsContext context = new SampleItemsContext
             {
@@ -59,17 +48,19 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
                 GlobalAccessibilityResources = globalResources, // TODO: Remove with global accessibility refactor
                 InteractionTypes = interactionTypes,
                 ItemDigests = itemDigests,
+                ItemCards = itemCards,
                 AppSettings = appSettings,
-                Claims = claims
+                Subjects = subjects
             };
 
             return context;
         }
 
-        private static async Task<IList<ItemDigest>> LoadItemDigests(
+        private static async Task<List<ItemDigest>> LoadItemDigests(
             AppSettings settings,
             IList<AccessibilityResourceFamily> accessibilityResourceFamilies,
-            IList<InteractionType> interactionTypes)
+            IList<InteractionType> interactionTypes,
+            IList<Subject> subjects)
         {
             string contentDir = settings.SettingsConfig.ContentItemDirectory;
 
@@ -86,12 +77,13 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
             IEnumerable<ItemContents> itemContents = await deserializeContents;
 
 
-            IList<ItemDigest> itemDigests = ItemDigestTranslation
+            var itemDigests = ItemDigestTranslation
                 .ItemsToItemDigests(
                     itemMetadata,
                     itemContents,
                     accessibilityResourceFamilies,
-                    interactionTypes)
+                    interactionTypes,
+                    subjects)
                 .ToList();
 
             return itemDigests;

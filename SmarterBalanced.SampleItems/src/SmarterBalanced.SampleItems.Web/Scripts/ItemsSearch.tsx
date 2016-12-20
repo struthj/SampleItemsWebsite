@@ -1,6 +1,6 @@
 ﻿
 interface SubjectClaims {
-    [subject: string]: { text: string; value: string }[]
+    [subject: string]: { text: string; value: string }[];
 }
 
 interface Loading {
@@ -29,6 +29,13 @@ interface InteractionType {
     label: string;
 }
 
+interface Subject {
+    code: string;
+    label: string;
+    claims: Claim[];
+    interactionTypeCodes: string[];
+}
+
 interface Claim {
     code: string;
     label: string;
@@ -36,21 +43,21 @@ interface Claim {
 
 namespace ItemsSearch {
     export interface Props {
-        interactionTypes: InteractionType[]
-        claims: Claim[]
-        apiClient: ItemsSearchClient
+        interactionTypes: InteractionType[];
+        subjects: Subject[];
+        apiClient: ItemsSearchClient;
     }
 
     export interface State {
-        searchResults: Resource<ItemDigest[]>;
+        searchResults: Resource<ItemCardViewModel[]>;
     }
     
-    export class Component extends React.Component<Props, State> {
+    export class ISComponent extends React.Component<Props, State> {
         constructor(props: Props) {
             super(props);
             this.state = { searchResults: { kind: "loading" } };
 
-            const defaultParams: SearchAPIParams = { gradeLevels: GradeLevels.All, subjects: [], claims: [], interactionTypes: [] };
+            const defaultParams: SearchAPIParams = { itemId: '', gradeLevels: GradeLevels.All, subjects: [], claims: [], interactionTypes: [] };
             this.beginSearch(defaultParams);
         }
 
@@ -72,7 +79,7 @@ namespace ItemsSearch {
             this.props.apiClient.itemsSearch(params, this.onSearch.bind(this), this.onError.bind(this));
         }
 
-        onSearch(results: ItemDigest[]) {
+        onSearch(results: ItemCardViewModel[]) {
             this.setState({ searchResults: { kind: "success", content: results } });
         }
 
@@ -91,7 +98,7 @@ namespace ItemsSearch {
             if (searchResults.kind === "success" || searchResults.kind === "reloading") {
                 resultsElement = searchResults.content.length === 0
                     ? <span className="placeholder-text">No results found for the given search terms.</span>
-                    : searchResults.content.map(digest => <ItemCard {...digest} />);
+                    : searchResults.content.map(digest => <ItemCard {...digest} key={digest.bankKey.toString() + "-" + digest.itemKey.toString()} />);
             } else if (searchResults.kind === "failure") {
                 resultsElement = <div className="placeholder-text">An error occurred. Please try again later.</div>;
             } else {
@@ -100,9 +107,9 @@ namespace ItemsSearch {
             const isLoading = this.isLoading();
             return (
                 <div className="search-container">
-                    <ItemSearchParams.Component
+                    <ItemSearchParams.ISPComponent
                         interactionTypes={this.props.interactionTypes}
-                        claims={this.props.claims}
+                        subjects={this.props.subjects}
                         onChange={(params) => this.beginSearch(params)}
                         isLoading={isLoading} />
                     <div className="search-results">
@@ -116,7 +123,7 @@ namespace ItemsSearch {
 
 interface ItemsSearchClient {
     itemsSearch(params: SearchAPIParams,
-        onSuccess: (data: ItemDigest[]) => void,
+        onSuccess: (data: ItemCardViewModel[]) => void,
         onError?: (jqXHR: JQueryXHR, textStatus: string, errorThrown: string) => any): any;
 }
 
@@ -134,14 +141,20 @@ const client: ItemsSearchClient = {
 };
 
 interface SearchAPIParams {
+    itemId: string;
     gradeLevels: GradeLevels;
     subjects: string[];
     claims: string[];
     interactionTypes: string[];
 }
 
-function initializeItemsSearch(viewModel: { interactionTypes: InteractionType[], claims: Claim[] }) {
+interface ItemsSearchViewModel {
+    interactionTypes: InteractionType[];
+    subjects: Subject[];
+}
+
+function initializeItemsSearch(viewModel: ItemsSearchViewModel) {
     ReactDOM.render(
-        <ItemsSearch.Component apiClient={client} {...viewModel} />,
+        <ItemsSearch.ISComponent apiClient={client} {...viewModel} />,
         document.getElementById("search-container") as HTMLElement);
 }

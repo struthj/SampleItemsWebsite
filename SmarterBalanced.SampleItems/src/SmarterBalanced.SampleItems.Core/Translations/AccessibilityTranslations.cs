@@ -19,9 +19,8 @@ namespace SmarterBalanced.SampleItems.Core.Translations
         public static string ToISAAP(this List<AccessibilityResourceViewModel> items)
         {
             if(items == null)
-            {
-                throw new ArgumentNullException();
-            }
+                throw new ArgumentNullException(nameof(items));
+
             return string.Join(";", items.Select(t => t.SelectedCode));
         }
 
@@ -33,9 +32,8 @@ namespace SmarterBalanced.SampleItems.Core.Translations
         public static List<string> ToISAAPList(string iSAAPCode)
         {
             if (string.IsNullOrEmpty(iSAAPCode))
-            {
                 return new List<string>();
-            }
+
             return iSAAPCode.Split(';').ToList();
         }
 
@@ -84,10 +82,6 @@ namespace SmarterBalanced.SampleItems.Core.Translations
             }
 
             var accResourceViewModels = ToAccessibilityResourceViewModels(accessibilityResources);
-            if (accResourceViewModels == null)
-            {
-                return accResourceViewModels;
-            }
 
             var codes = ToISAAPList(iSAAPCode);
 

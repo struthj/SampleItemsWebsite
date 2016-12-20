@@ -1,4 +1,5 @@
-﻿using SmarterBalanced.SampleItems.Core.Repos.Models;
+﻿using Microsoft.Extensions.Logging;
+using SmarterBalanced.SampleItems.Core.Repos.Models;
 using SmarterBalanced.SampleItems.Dal.Providers;
 using SmarterBalanced.SampleItems.Dal.Providers.Models;
 using System.Collections.Generic;
@@ -11,45 +12,54 @@ namespace SmarterBalanced.SampleItems.Core.Repos
 {
     public class SampleItemsSearchRepo : ISampleItemsSearchRepo
     {
-        private SampleItemsContext context;
-        public SampleItemsSearchRepo(SampleItemsContext context)
+        private readonly SampleItemsContext context;
+        private readonly ILogger logger;
+
+        public SampleItemsSearchRepo(SampleItemsContext context, ILoggerFactory loggerFactory)
         {
             this.context = context;
+            logger = loggerFactory.CreateLogger<SampleItemsSearchRepo>();
         }
 
-        public IList<ItemDigest> GetItemDigests()
+        public IList<ItemCardViewModel> GetItemCards()
         {
-            return context.ItemDigests.Where(i => i.Grade != GradeLevels.NA).ToList();
+            return context.ItemCards.Where(i => i.Grade != GradeLevels.NA).ToList();
         }
 
-        // TODO: what should terms search on?
-        public IList<ItemDigest> GetItemDigests(GradeLevels grades, IList<string> subjects, string[] interactionTypes)
+        public IList<ItemCardViewModel> GetItemCards(ItemsSearchParams parms)
         {
-            var query = context.ItemDigests.Where(i => i.Grade != GradeLevels.NA);
-            if (grades != GradeLevels.All && grades != GradeLevels.NA)
+            int itemId;
+            if (int.TryParse(parms.ItemId, out itemId))
             {
-                query = query.Where(i => GradeLevelsUtils.Contains(grades, i.Grade));
+                var item = context.ItemCards.FirstOrDefault(i => i.ItemKey == itemId);
+                if (item == null)
+                    return new List<ItemCardViewModel>();
+                else
+                    return new List<ItemCardViewModel> { item };
             }
 
-            if (subjects != null && subjects.Any())
-            {
-                query = query.Where(i => subjects.Contains(i.Subject));
-            }
+            var query = context.ItemCards.Where(i => i.Grade != GradeLevels.NA);
+            if (parms.Grades != GradeLevels.All && parms.Grades != GradeLevels.NA)
+                query = query.Where(i => GradeLevelsUtils.Contains(parms.Grades, i.Grade));
 
-            if (interactionTypes.Any())
-            {
-                query = query.Where(i => interactionTypes.Contains(i.InteractionTypeCode));
-            }
+            if (parms.Subjects != null && parms.Subjects.Any())
+                query = query.Where(i => parms.Subjects.Contains(i.SubjectCode));
 
-            return query.ToList();
+            if (parms.InteractionTypes.Any())
+                query = query.Where(i => parms.InteractionTypes.Contains(i.InteractionTypeCode));
+
+            if (parms.ClaimIds.Any())
+                query = query.Where(i => parms.ClaimIds.Contains(i.ClaimCode));
+
+            return query.OrderBy(i => i.SubjectCode).ThenBy(i => i.Grade).ThenBy(i => i.ClaimCode).ToList();
         }
 
         public ItemsSearchViewModel GetItemsSearchViewModel()
         {
-           return new ItemsSearchViewModel
+            return new ItemsSearchViewModel
             {
                 InteractionTypes = context.InteractionTypes,
-                Claims = context.Claims
+                Subjects = context.Subjects
             };
         }
     }
