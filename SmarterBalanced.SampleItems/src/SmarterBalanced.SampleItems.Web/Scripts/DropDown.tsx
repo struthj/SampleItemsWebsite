@@ -23,7 +23,8 @@ class DropDown extends React.Component<DropdownProps, DropdownState> {
     renderOption(selection: Selection) {
         return (
             <option value={selection.code}
-                disabled={selection.disabled}>
+                disabled={selection.disabled}
+                key={selection.label}>
 
                 {selection.label}
             </option>
@@ -33,9 +34,10 @@ class DropDown extends React.Component<DropdownProps, DropdownState> {
     render() {
         const options = this.props.selections.map(this.renderOption);
         return (
-            <div>
-                <label>{this.props.label}</label>
-                <select>
+            <div className="accessibility-dropdown form-group">
+                <label>{this.props.label}</label><br/>
+                <select className="form-control"
+                    onChange={(selection) => this.props.onChange}>
                     {options}
                 </select>
             </div>
