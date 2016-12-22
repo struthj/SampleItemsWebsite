@@ -93,6 +93,10 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
         public static List<Rubric> ToRubric(this List<XmlModels.Content> contents)
         {
             List<Rubric> rubrics = new List<Rubric>();
+            if(contents == null)
+            {
+                return rubrics;
+            }
 
             foreach(var content in contents)
             {
