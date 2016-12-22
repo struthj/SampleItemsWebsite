@@ -28,7 +28,7 @@ interface AboutItemViewModel {
     targetId: string;
     grade: GradeLevels;
     rubrics: Rubric[];
-    // depthOfKnowledge: string; // TODO: Add to xml
+    // depthOfKnowledge: string; // TODO: Add when supported by xml
 }
 
 
@@ -46,9 +46,18 @@ namespace AboutItem {
         }
 
         renderSection(child: string, label: string) {
+            if (child == null || !child) {
+                return undefined;
+            }
+
+            const body = <div>{child}</div>;
+            return this.renderSectionElement(body, label);
+        } 
+
+        renderSectionElement(child: JSX.Element, label: string, key?: string) {
             return (
-                <div>
-                    <Collapsible.CLComponent label={label} className="search-category" style={{ flexGrow: 3 }}>
+                <div key={key}>
+                    <Collapsible.CLComponent label={label} className="about-item-section" >
                         <div>
                             {child}
                         </div>
@@ -57,7 +66,7 @@ namespace AboutItem {
                 </div>
             );
         } 
-
+        
         renderCCSS() {
             return this.renderSection(this.props.viewModel.commonCoreStandardsId, "Common Core State Standards");
         }
@@ -67,113 +76,99 @@ namespace AboutItem {
         }
 
         renderTargetGrade() {
-            return this.renderSection(this.props.viewModel.grade.toString(), "Target Grade");
+            const gradelevel = GradeLevels.toString(this.props.viewModel.grade);
+            return this.renderSection(gradelevel, "Target Grade");
         }
 
-        renderRubricEntry(rubricEntry: RubricEntry) {
-            let label = `${rubricEntry.name} (${rubricEntry.scorePoint} points)`;
-            let content = <div dangerouslySetInnerHTML={{ __html: rubricEntry.value }} />;
-
-            return (
+        renderRubricEntry(rubricEntry: RubricEntry, key: string) {
+            const label = `${rubricEntry.name} (${rubricEntry.scorePoint} points)`;
+            const body = (
                 <div>
-                    <Collapsible.CLComponent label={label} className="search-category" style={{ flexGrow: 3 }}>
-                        <div>
-                            {rubricEntry.scorePoint} <br />
-                            {content}
-                        </div>
-                    </Collapsible.CLComponent>
-                    <br />
+                    {rubricEntry.scorePoint} <br />
+                    <div dangerouslySetInnerHTML={{ __html: rubricEntry.value }} />
                 </div>
-                );
+            );
+            return this.renderSectionElement(body, label, key);
         }
 
-        renderRubricEntries(rubricEntries: RubricEntry[]) {
+        renderRubricEntries(rubricEntries: RubricEntry[], parentKey: string) {
             if (rubricEntries == null){
                 return undefined;
             }
 
             let rubricsEntryElems: Array<JSX.Element> = [];
             for (let i = 0; i < rubricEntries.length; i++) {
-                let rubricEntry: RubricEntry = rubricEntries[i];
-                rubricsEntryElems.push(this.renderRubricEntry(rubricEntry));
+                const rubricEntry: RubricEntry = rubricEntries[i];
+                const key = `${parentKey}-${i}`;
+                rubricsEntryElems.push(this.renderRubricEntry(rubricEntry, key));
             }
 
             return rubricsEntryElems;
         }
 
-        renderSampleResponse(sampleResponse: SampleResponse) {
-            let label = `${sampleResponse.name} (${sampleResponse.scorePoint} Points)`;
-            let content = <div dangerouslySetInnerHTML={{ __html: sampleResponse.sampleContent }} />;
-
-            return (
-                <div>
-                    <Collapsible.CLComponent label={label} className="search-category" style={{ flexGrow: 3 }}>
-                        <div>
-                            {`Purpose: ${sampleResponse.purpose}`} <br />
-                            {content}
-                        </div>
-                    </Collapsible.CLComponent>
-                    <br />
+        renderSampleResponse(sampleResponse: SampleResponse, key: string) {
+            const label = `${sampleResponse.name} (${sampleResponse.scorePoint} Points)`;
+            const body = (
+                <div className="sample-response">
+                    <b>{"Purpose: "}</b> {sampleResponse.purpose} <br />
+                    <b>{"Sample Response: "}</b><br/>
+                    <div dangerouslySetInnerHTML={{ __html: sampleResponse.sampleContent }} />
                 </div>
-                );
+            );
+            return this.renderSectionElement(body, label, key);
         }
 
-        renderSampleResponses(sampleResponses: SampleResponse[]) {
+        renderSampleResponses(sampleResponses: SampleResponse[], parentKey: string) {
             if (sampleResponses == null) {
                 return undefined;
             }
 
             let sampleResponseElems: Array<JSX.Element> = [];
             for (let i = 0; i < sampleResponses.length; i++) {
-                let sampleResponse = sampleResponses[i];
-                sampleResponseElems.push(this.renderSampleResponse(sampleResponse));
+                const sampleResponse = sampleResponses[i];
+                const key = `${parentKey}-${i}`;
+                sampleResponseElems.push(this.renderSampleResponse(sampleResponse, key));
             }
 
             return sampleResponseElems;
 
         }
 
-        renderRubricSample(rubricSample: RubricSample) {
-            let label = `Sample Response (Minimum Score: ${rubricSample.minValue}, Maximum Score ${rubricSample.maxValue})`;
-            return (
+        renderRubricSample(rubricSample: RubricSample, parentKey: string) {
+            const label = `Sample Response (Minimum Score: ${rubricSample.minValue}, Maximum Score ${rubricSample.maxValue})`;
+            const body = (
                 <div>
-                    <Collapsible.CLComponent label={label} className="search-category" style={{ flexGrow: 3 }}>
-                        <div>
-                            {this.renderSampleResponses(rubricSample.sampleResponses)}
-                        </div>
-                    </Collapsible.CLComponent>
-                    <br />
+                    {this.renderSampleResponses(rubricSample.sampleResponses, parentKey)}
                 </div>
-                );
+            );
+            return this.renderSectionElement(body, label, parentKey); 
         }
 
-        renderRubricSamples(rubricSamples: RubricSample[]) {
+        renderRubricSamples(rubricSamples: RubricSample[], parentKey: string) {
             if (rubricSamples == null) {
                 return undefined;
             }
 
             let rubricsEntryElems: Array<JSX.Element> = [];
             for (let i = 0; i < rubricSamples.length; i++) {
-                let rubricSample = rubricSamples[i];
-                rubricsEntryElems.push(this.renderRubricSample(rubricSample));
+                const rubricSample = rubricSamples[i];
+                const key = `${parentKey}-${i}`;
+                rubricsEntryElems.push(this.renderRubricSample(rubricSample, key));
             }
 
             return rubricsEntryElems;
         }
 
-        renderRubric(rubric: Rubric) {
-            return (
+        renderRubric(rubric: Rubric, idx: number) {
+            const label = `${rubric.language} Rubric`;
+            const key = `${rubric.language}-rubric-${idx}`;
+            const body = (
                 <div>
-                    <Collapsible.CLComponent label={"Rubric"} className="search-category" style={{ flexGrow: 3 }}>
-                        <div>
-                            {rubric.language}
-                            {this.renderRubricEntries(rubric.rubricEntries)} <br />
-                            {this.renderRubricSamples(rubric.samples)}
-                        </div>
-                    </Collapsible.CLComponent>
-                    <br />
+                    {this.renderRubricEntries(rubric.rubricEntries, key)} <br />
+                    {this.renderRubricSamples(rubric.samples, key)}
                 </div>
-                );
+            );
+            return this.renderSectionElement(body, label, key);
         }
 
         renderRubrics() {
@@ -182,22 +177,21 @@ namespace AboutItem {
             }
 
             let rubricsElems: Array<JSX.Element> = [];
-            let rubrics = this.props.viewModel.rubrics;
+            const rubrics = this.props.viewModel.rubrics;
             for (let i = 0; i < rubrics.length; i++) {
-                let rubric = rubrics[i];
-                rubricsElems.push(this.renderRubric(rubric));
+                const rubric = rubrics[i];
+                rubricsElems.push(this.renderRubric(rubric, i));
             }
             return rubricsElems;
         }
 
-        //TODO: Update style for dropdowns
         render() {
             return (
                 <div className="about-item-container">
-                    {this.renderCCSS()} <br/>
-                    {this.renderTarget()} <br />
-                    {this.renderTargetGrade()} <br />
-                    {this.renderRubrics()} <br />
+                    {this.renderCCSS()}
+                    {this.renderTarget()}
+                    {this.renderTargetGrade()}
+                    {this.renderRubrics()}
                 </div>
             );
         }

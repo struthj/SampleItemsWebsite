@@ -1,7 +1,6 @@
 ﻿body {
     padding-bottom: 20px;
     margin-bottom: 75px; /* bottom = footer height */
-   
 }
 
 html {
@@ -350,4 +349,14 @@ h4.card-title{
 
 .btn-primary:hover {
     background-color: #166626;
+}
+
+.about-item-section {
+    justify-content: center;
+    padding-left: 10px;
+    padding-right: 5px;
+}
+
+.sample-response {
+    margin-left: 15px;
 }
