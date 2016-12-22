@@ -45,8 +45,7 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">About This Item</h4>
             </div>
-            <div class="modal-body">
-                @Html.Partial("_About", Model.ItemDigest.Rubrics)
+            <div id="about-item-container" class="modal-body">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -74,11 +73,19 @@
     </div>
 </div>
 
-<script src="~/scripts/ItemAccessibility.js"></script>
+@section Scripts {
+    <script src="~/scripts/ItemAccessibility.js"></script>
+    <script src="~/scripts/AboutItem.js"></script>
+    <script src="~/scripts/Collapsible.js"></script>
+    <script src="~/scripts/GradeLevels.js"></script>
 
-<script>
-    var url = '@Html.Raw(Url.Action("ResetToGlobalAccessibility", "Item",
-        new { bankKey = Model.ItemDigest.BankKey, itemKey = Model.ItemDigest.ItemKey }))';
+    <script>
+        var url = '@Html.Raw(Url.Action("ResetToGlobalAccessibility", "Item",
+            new { bankKey = Model.ItemDigest.BankKey, itemKey = Model.ItemDigest.ItemKey }))';
 
-    initializeItemAccessibility(url);
-</script>
+        initializeItemAccessibility(url);
+    
+        var viewModel = @Json.Serialize(Model.ItemDigest);
+        initializeAboutItem(viewModel);
+    </script>
+}
