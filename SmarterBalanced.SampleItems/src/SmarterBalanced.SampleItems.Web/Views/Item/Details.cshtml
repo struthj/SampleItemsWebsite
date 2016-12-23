@@ -26,7 +26,7 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">View More</h4>
             </div>
-            <div class="modal-body">
+            <div id="more-like-this-container" class="modal-body">
                 <p>Other items will be displayed here.</p>
             </div>
             <div class="modal-footer">
@@ -74,6 +74,13 @@
 </div>
 
 @section Scripts {
+    
+    @* EXPERIMENTAL *@
+    <script src="~/scripts/TestAboutItem.js"></script>
+    <script src="~/scripts/Expandable.js"></script>
+    @* EXPERIMENTAL *@
+    
+    
     <script src="~/scripts/ItemAccessibility.js"></script>
     <script src="~/scripts/AboutItem.js"></script>
     <script src="~/scripts/Collapsible.js"></script>
@@ -84,8 +91,14 @@
             new { bankKey = Model.ItemDigest.BankKey, itemKey = Model.ItemDigest.ItemKey }))';
 
         initializeItemAccessibility(url);
-    
-        var viewModel = @Json.Serialize(Model.ItemDigest);
-        initializeAboutItem(viewModel);
+
+        var itemDigest = @Json.Serialize(Model.ItemDigest);
+        initializeAboutItem(itemDigest);
+
+        //EXPERIMENTAL
+        var itemDigest = @Json.Serialize(Model.ItemDigest);
+        initializeExpandable(itemDigest);
+        //EXPERIMENTAL
+
     </script>
 }

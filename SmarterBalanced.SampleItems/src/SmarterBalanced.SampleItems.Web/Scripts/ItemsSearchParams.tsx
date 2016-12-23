@@ -243,11 +243,14 @@ namespace ItemSearchParams {
             ];
 
             return (
-                <Collapsible.CLComponent label="Grade Levels" className="search-category" style={{ flexGrow: 3 }}>
+                <div className="search-category" style={{ flexGrow: 3 }}>
+                    <label onClick={() => this.toggleExpandGradeLevels()}>
+                        {this.state.expandGradeLevels ? "▼" : "▶"}Grade Levels
+                    </label>
                     <div className="search-tags form-group">
-                        {tags}
+                        {this.state.expandGradeLevels ? tags : undefined}
                     </div>
-                </Collapsible.CLComponent>
+                </div>
             );
         }
 
