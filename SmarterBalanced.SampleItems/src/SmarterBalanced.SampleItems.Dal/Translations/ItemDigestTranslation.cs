@@ -104,7 +104,7 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
                     new Rubric
                     {
                         Language = content?.Language,
-                        RubricsEntries = content?.RubricList?.Rubrics,
+                        RubricEntries = content?.RubricList?.Rubrics,
                         Samples = content?.RubricList?.RubricSamples
                     });
             }

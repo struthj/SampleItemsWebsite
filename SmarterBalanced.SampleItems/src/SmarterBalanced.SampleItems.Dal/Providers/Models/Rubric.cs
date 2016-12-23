@@ -10,7 +10,7 @@ namespace SmarterBalanced.SampleItems.Dal.Providers.Models
     {
         public string Language { get; set; }
 
-        public List<RubricEntry> RubricsEntries { get; set; }
+        public List<RubricEntry> RubricEntries { get; set; }
 
         public List<RubricSample> Samples { get; set; }
     }

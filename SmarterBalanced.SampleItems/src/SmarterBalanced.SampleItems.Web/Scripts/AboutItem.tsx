@@ -12,7 +12,7 @@ interface RubricSample {
 }
 
 interface RubricEntry {
-    scorePoint: string;
+    scorepoint: string;
     name: string;
     value: string;
 }
@@ -150,10 +150,10 @@ class InitializeAboutItem {
     }
 
     buildRubricEntry(rubricEntry: RubricEntry, key: string) {
-        const label = `${rubricEntry.name} (${rubricEntry.scorePoint} points)`;
+        const pointLabel = rubricEntry.scorepoint == "1" ? "point" : "points";
+        const label = `${rubricEntry.name} (${rubricEntry.scorepoint} ${pointLabel})`;
         const body = (
             <div>
-                {rubricEntry.scorePoint} <br />
                 <div dangerouslySetInnerHTML={{ __html: rubricEntry.value }} />
             </div>
         );
@@ -229,8 +229,9 @@ class InitializeAboutItem {
     buildRubric(rubric: Rubric, idx: string) {
         const label = `${rubric.language} Rubric`;
         const key = `${rubric.language}-rubric-${idx}`;
-        const rubricEntries = this.buildRubricEntries(rubric.rubricEntries, key);
-        const rubricSamples = this.buildRubricSamples(rubric.samples, key);
+
+        const rubricEntries = this.buildRubricEntries(rubric.rubricEntries, `${key}-entries`);
+        const rubricSamples = this.buildRubricSamples(rubric.samples, `${key}-samples`);
         
         return this.buildGenericComponent(key, label, undefined, undefined, rubricEntries.concat(rubricSamples));
     }
