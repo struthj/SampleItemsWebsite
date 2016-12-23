@@ -75,15 +75,9 @@
 
 @section Scripts {
     
-    @* EXPERIMENTAL *@
-    <script src="~/scripts/TestAboutItem.js"></script>
-    <script src="~/scripts/Expandable.js"></script>
-    @* EXPERIMENTAL *@
-    
-    
-    <script src="~/scripts/ItemAccessibility.js"></script>
     <script src="~/scripts/AboutItem.js"></script>
     <script src="~/scripts/Collapsible.js"></script>
+    <script src="~/scripts/ItemAccessibility.js"></script>
     <script src="~/scripts/GradeLevels.js"></script>
 
     <script>
@@ -94,11 +88,5 @@
 
         var itemDigest = @Json.Serialize(Model.ItemDigest);
         initializeAboutItem(itemDigest);
-
-        //EXPERIMENTAL
-        var itemDigest = @Json.Serialize(Model.ItemDigest);
-        initializeExpandable(itemDigest);
-        //EXPERIMENTAL
-
     </script>
 }

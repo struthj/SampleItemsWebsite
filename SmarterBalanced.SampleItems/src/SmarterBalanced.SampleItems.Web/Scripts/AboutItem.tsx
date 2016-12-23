@@ -1,7 +1,7 @@
 ﻿interface SampleResponse {
     purpose: string;
     scorePoint: string;
-    name: string; 
+    name: string;
     sampleContent: string;
 }
 
@@ -24,6 +24,7 @@ interface Rubric {
 }
 
 interface AboutItemViewModel {
+    itemKey: number;
     commonCoreStandardsId: string;
     targetId: string;
     grade: GradeLevels;
@@ -34,173 +35,220 @@ interface AboutItemViewModel {
 
 namespace AboutItem {
 
-    export interface Props {
-        viewModel: AboutItemViewModel;
+    interface Props {
+        children: JSX.Element[];
     }
 
-    export interface State { }
+    interface State {
+        isCollapsed: boolean;
+        childNodes: JSX.Element[];
+    }
 
-    export class AIComponent extends React.Component<Props, State> {
+    export class RootComponent extends React.Component<Props, State> {
         constructor(props: Props) {
             super(props);
+            this.state = {
+                isCollapsed: true,
+                childNodes: props.children
+            };
         }
 
-        renderSection(child: string, label: string) {
-            if (child == null || !child) {
-                return undefined;
+        toggleAll() {
+            const newState = !this.state.isCollapsed;
+            let newChildren: JSX.Element[] = []
+            for (let i = 0; i < this.state.childNodes.length; i++) {
+                const child = this.state.childNodes[i];
+                let props = Object.apply(child.props);
+                props.areAllCollapsed = newState;
+                newChildren.push(React.cloneElement(child, props));
             }
 
-            const body = <div>{child}</div>;
-            return this.renderSectionElement(body, label);
-        } 
-
-        renderSectionElement(child: JSX.Element, label: string, key?: string) {
-            return (
-                <div key={key}>
-                    <Collapsible.CLComponent label={label} className="about-item-section" >
-                        <div>
-                            {child}
-                        </div>
-                    </Collapsible.CLComponent>
-                    <br />
-                </div>
-            );
-        } 
-        
-        renderCCSS() {
-            return this.renderSection(this.props.viewModel.commonCoreStandardsId, "Common Core State Standards");
-        }
-
-        renderTarget() {
-            return this.renderSection(this.props.viewModel.targetId, "Target");
-        }
-
-        renderTargetGrade() {
-            const gradelevel = GradeLevels.toString(this.props.viewModel.grade);
-            return this.renderSection(gradelevel, "Target Grade");
-        }
-
-        renderRubricEntry(rubricEntry: RubricEntry, key: string) {
-            const label = `${rubricEntry.name} (${rubricEntry.scorePoint} points)`;
-            const body = (
-                <div>
-                    {rubricEntry.scorePoint} <br />
-                    <div dangerouslySetInnerHTML={{ __html: rubricEntry.value }} />
-                </div>
-            );
-            return this.renderSectionElement(body, label, key);
-        }
-
-        renderRubricEntries(rubricEntries: RubricEntry[], parentKey: string) {
-            if (rubricEntries == null){
-                return undefined;
-            }
-
-            let rubricsEntryElems: Array<JSX.Element> = [];
-            for (let i = 0; i < rubricEntries.length; i++) {
-                const rubricEntry: RubricEntry = rubricEntries[i];
-                const key = `${parentKey}-${i}`;
-                rubricsEntryElems.push(this.renderRubricEntry(rubricEntry, key));
-            }
-
-            return rubricsEntryElems;
-        }
-
-        renderSampleResponse(sampleResponse: SampleResponse, key: string) {
-            const label = `${sampleResponse.name} (${sampleResponse.scorePoint} Points)`;
-            const body = (
-                <div className="sample-response">
-                    <b>{"Purpose: "}</b> {sampleResponse.purpose} <br />
-                    <b>{"Sample Response: "}</b><br/>
-                    <div dangerouslySetInnerHTML={{ __html: sampleResponse.sampleContent }} />
-                </div>
-            );
-            return this.renderSectionElement(body, label, key);
-        }
-
-        renderSampleResponses(sampleResponses: SampleResponse[], parentKey: string) {
-            if (sampleResponses == null) {
-                return undefined;
-            }
-
-            let sampleResponseElems: Array<JSX.Element> = [];
-            for (let i = 0; i < sampleResponses.length; i++) {
-                const sampleResponse = sampleResponses[i];
-                const key = `${parentKey}-${i}`;
-                sampleResponseElems.push(this.renderSampleResponse(sampleResponse, key));
-            }
-
-            return sampleResponseElems;
-
-        }
-
-        renderRubricSample(rubricSample: RubricSample, parentKey: string) {
-            const label = `Sample Response (Minimum Score: ${rubricSample.minValue}, Maximum Score ${rubricSample.maxValue})`;
-            const body = (
-                <div>
-                    {this.renderSampleResponses(rubricSample.sampleResponses, parentKey)}
-                </div>
-            );
-            return this.renderSectionElement(body, label, parentKey); 
-        }
-
-        renderRubricSamples(rubricSamples: RubricSample[], parentKey: string) {
-            if (rubricSamples == null) {
-                return undefined;
-            }
-
-            let rubricsEntryElems: Array<JSX.Element> = [];
-            for (let i = 0; i < rubricSamples.length; i++) {
-                const rubricSample = rubricSamples[i];
-                const key = `${parentKey}-${i}`;
-                rubricsEntryElems.push(this.renderRubricSample(rubricSample, key));
-            }
-
-            return rubricsEntryElems;
-        }
-
-        renderRubric(rubric: Rubric, idx: number) {
-            const label = `${rubric.language} Rubric`;
-            const key = `${rubric.language}-rubric-${idx}`;
-            const body = (
-                <div>
-                    {this.renderRubricEntries(rubric.rubricEntries, key)} <br />
-                    {this.renderRubricSamples(rubric.samples, key)}
-                </div>
-            );
-            return this.renderSectionElement(body, label, key);
-        }
-
-        renderRubrics() {
-            if (this.props.viewModel.rubrics == null) {
-                return undefined;
-            }
-
-            let rubricsElems: Array<JSX.Element> = [];
-            const rubrics = this.props.viewModel.rubrics;
-            for (let i = 0; i < rubrics.length; i++) {
-                const rubric = rubrics[i];
-                rubricsElems.push(this.renderRubric(rubric, i));
-            }
-            return rubricsElems;
+            this.setState({
+                isCollapsed: newState,
+                childNodes: newChildren
+            });
         }
 
         render() {
+            const label = this.state.isCollapsed ? "▶ Show All" : "▼ Hide All";
             return (
-                <div className="about-item-container">
-                    {this.renderCCSS()}
-                    {this.renderTarget()}
-                    {this.renderTargetGrade()}
-                    {this.renderRubrics()}
+                <div className="more-like-this-container">
+                    <button onClick={() => this.toggleAll()}>{label}</button>
+                    {this.state.childNodes}
                 </div>
             );
         }
+
     }
+
+}
+
+class InitializeAboutItem {
+    rootChildren: JSX.Element[];
+    viewModel: AboutItemViewModel;
+    isCollapsed: boolean = true;
+    rootClassName: string;
+
+    constructor(viewModel: AboutItemViewModel, rootClassName: string) {
+        this.viewModel = viewModel;
+        this.rootClassName = rootClassName;
+        this.rootChildren = [];
+
+        this.pushTextElems();
+        this.pushRubrics();
+    }
+
+    renderElements() {
+        ReactDOM.render(
+            <AboutItem.RootComponent children={this.rootChildren} />,
+            document.getElementById(this.rootClassName) as HTMLElement
+        );
+    }
+
+    buildTextComponent(key: string, label: string, bodyText: string) {
+        const htmlBody = (<div>{bodyText}</div>);
+        return this.buildGenericComponent(key, label, htmlBody, undefined, undefined);
+    }
+
+    // Helper to build a generic Collapsible.NodeComponent
+    buildGenericComponent(
+        key: string,
+        label: string,
+        body?: JSX.Element,
+        style?: React.CSSProperties,
+        childNodes?: JSX.Element[]) {
+        return (
+            <Collapsible.NodeComponent
+                key={key}
+                areAllCollapsed={this.isCollapsed}
+                className={this.rootClassName}
+                label={label}
+                body={body}
+                style={style}
+                childNodes={childNodes}
+                />
+        );
+    }
+
+    pushTextElems() {
+        this.rootChildren.push(
+            this.buildTextComponent("item-id", "Item Id", this.viewModel.itemKey.toString())
+        );
+
+        this.rootChildren.push(
+            this.buildTextComponent("ccss", "Common Core State Standards", this.viewModel.commonCoreStandardsId)
+        );
+
+        this.rootChildren.push(
+            this.buildTextComponent("target", "Target Id", this.viewModel.targetId)
+        );
+
+        const grade = GradeLevels.toString(this.viewModel.grade);
+        this.rootChildren.push(
+            this.buildTextComponent("target-grade", "Target Grade", grade)
+        );
+    }
+
+    buildRubricEntry(rubricEntry: RubricEntry, key: string) {
+        const label = `${rubricEntry.name} (${rubricEntry.scorePoint} points)`;
+        const body = (
+            <div>
+                {rubricEntry.scorePoint} <br />
+                <div dangerouslySetInnerHTML={{ __html: rubricEntry.value }} />
+            </div>
+        );
+
+        return this.buildGenericComponent(key, label, body, undefined, undefined);
+    }
+
+    buildRubricEntries(rubricEntries: RubricEntry[], parentKey: string) {
+        let rubricsEntryElems: JSX.Element[] = [];
+        if (rubricEntries == null) {
+            return rubricsEntryElems;
+        }
+
+        for (let i = 0; i < rubricEntries.length; i++) {
+            const rubricEntry: RubricEntry = rubricEntries[i];
+            const key = `${parentKey}-${i}`;
+            rubricsEntryElems.push(this.buildRubricEntry(rubricEntry, key));
+        }
+
+        return rubricsEntryElems;
+    }
+
+    buildSampleResponse(sampleResponse: SampleResponse, key: string) {
+        const label = `${sampleResponse.name} (${sampleResponse.scorePoint} Points)`;
+        const body = (
+            <div className="sample-response">
+                <b>{"Purpose: "}</b> {sampleResponse.purpose} <br />
+                <b>{"Sample Response: "}</b><br />
+                <div dangerouslySetInnerHTML={{ __html: sampleResponse.sampleContent }} />
+            </div>
+        );
+
+        return this.buildGenericComponent(key, label, body, undefined, undefined);
+    }
+
+    buildSampleResponses(sampleResponses: SampleResponse[], parentKey: string) {
+        let sampleResponseElems: JSX.Element[] = [];
+        if (sampleResponses == null) {
+            return sampleResponseElems;
+        }
+
+        for (let i = 0; i < sampleResponses.length; i++) {
+            const sampleResponse = sampleResponses[i];
+            const key = `${parentKey}-${i}`;
+            sampleResponseElems.push(this.buildSampleResponse(sampleResponse, key));
+        }
+
+        return sampleResponseElems;
+    }
+
+    buildRubricSample(rubricSample: RubricSample, parentKey: string) {
+        const label = `Sample Response (Minimum Score: ${rubricSample.minValue}, Maximum Score ${rubricSample.maxValue})`;
+        const childNodes = this.buildSampleResponses(rubricSample.sampleResponses, parentKey);
+
+        return this.buildGenericComponent(parentKey, label, undefined, undefined, childNodes);
+    }
+
+    buildRubricSamples(rubricSamples: RubricSample[], parentKey: string) {
+        let rubricsEntryElems: JSX.Element[] = [];
+        if (rubricSamples == null) {
+            return rubricsEntryElems;
+        }
+
+        for (let i = 0; i < rubricSamples.length; i++) {
+            const rubricSample = rubricSamples[i];
+            const key = `${parentKey}-${i}`;
+            rubricsEntryElems.push(this.buildRubricSample(rubricSample, key));
+        }
+
+        return rubricsEntryElems;
+    }
+
+    buildRubric(rubric: Rubric, idx: string) {
+        const label = `${rubric.language} Rubric`;
+        const key = `${rubric.language}-rubric-${idx}`;
+        const rubricEntries = this.buildRubricEntries(rubric.rubricEntries, key);
+        const rubricSamples = this.buildRubricSamples(rubric.samples, key);
+        
+        return this.buildGenericComponent(key, label, undefined, undefined, rubricEntries.concat(rubricSamples));
+    }
+
+    pushRubrics() {
+        if (this.viewModel.rubrics == null) {
+            return;
+        }
+
+        const rubrics = this.viewModel.rubrics;
+        for (let i = 0; i < rubrics.length; i++) {
+            const rubric = rubrics[i];
+            this.rootChildren.push(this.buildRubric(rubric, i.toString()));
+        }
+    }
+
 }
 
 function initializeAboutItem(viewModel: AboutItemViewModel) {
-    ReactDOM.render(
-        <AboutItem.AIComponent viewModel={viewModel} />,
-        document.getElementById("about-item-container") as HTMLElement
-    );
+    new InitializeAboutItem(viewModel, "about-item-container").renderElements();
 }
