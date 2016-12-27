@@ -62,15 +62,15 @@
             else {
                 label = "▼ " + this.props.label;
             }
-            const classNames = `${this.props.className} noselect`;
+
             return (
-                <div className={classNames} style={this.props.style} aria-expanded={!this.state.isCollapsed}>
-                    <label onClick={() => this.toggleCollapse()}>
+                <div className={this.props.className} style={this.props.style} aria-expanded={!this.state.isCollapsed} tabIndex={0}>
+                    <a role="button" className="collapsible-label" href="#" onClick={() => this.toggleCollapse()}>
                         {label}
-                    </label>
-                    <div style={style} aria-hidden={this.state.isCollapsed}>
+                    </a>
+                    <div className="collapsible-body" style={style} aria-hidden={this.state.isCollapsed}>
                         {this.props.body}
-                        <ul>
+                        <ul className="collapsible-children">
                             {this.state.childNodes}
                         </ul>
                     </div>

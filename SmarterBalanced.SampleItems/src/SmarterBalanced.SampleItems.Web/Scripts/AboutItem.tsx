@@ -72,7 +72,7 @@ namespace AboutItem {
         render() {
             const label = this.state.isCollapsed ? "▶ Show All" : "▼ Hide All";
             return (
-                <div className="more-like-this-container">
+                <div className="about-item-container">
                     <button onClick={() => this.toggleAll()}>{label}</button>
                     {this.state.childNodes}
                 </div>
@@ -100,7 +100,7 @@ class InitializeAboutItem {
 
     renderElements() {
         ReactDOM.render(
-            <AboutItem.RootComponent children={this.rootChildren} />,
+            <AboutItem.RootComponent children={this.rootChildren} aria-expanded={!this.isCollapsed}/>,
             document.getElementById(this.rootClassName) as HTMLElement
         );
     }

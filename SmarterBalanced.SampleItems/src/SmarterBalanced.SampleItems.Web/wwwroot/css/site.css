@@ -361,12 +361,19 @@ h4.card-title{
     background-color: #166626;
 }
 
-.about-item-section {
-    justify-content: center;
-    padding-left: 10px;
-    padding-right: 5px;
+.collapsible-body {
+    padding-left: 14px;
+}
+
+.collapsible-children {
+    padding-left: 1px;
+}
+
+.collapsible-label, a.collapsible-label:hover, a.collapsible-label:active, a.collapsible-label:visited {
+    color: black;
+    text-decoration: none;
 }
 
 .sample-response {
-    margin-left: 15px;
+    margin-left: 10px;
 }
