@@ -62,12 +62,13 @@
             else {
                 label = "▼ " + this.props.label;
             }
+            const classNames = `${this.props.className} noselect`;
             return (
-                <div className={this.props.className} style={this.props.style}>
+                <div className={classNames} style={this.props.style} aria-expanded={!this.state.isCollapsed}>
                     <label onClick={() => this.toggleCollapse()}>
                         {label}
                     </label>
-                    <div style={style}>
+                    <div style={style} aria-hidden={this.state.isCollapsed}>
                         {this.props.body}
                         <ul>
                             {this.state.childNodes}
