@@ -103,7 +103,7 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
                 var rubricEntries = content?.RubricList?.Rubrics?.Where(r => !string.IsNullOrWhiteSpace(r.Value)).ToList();
                 var samples = content?.RubricList?.RubricSamples?.Where(r => r.SampleResponses.Count() > 0).ToList();
 
-                if(rubricEntries?.Count() > 0 && samples?.Count() > 0)
+                if(rubricEntries?.Count() > 0 || samples?.Count() > 0)
                 {
                     rubrics.Add(
                         new Rubric

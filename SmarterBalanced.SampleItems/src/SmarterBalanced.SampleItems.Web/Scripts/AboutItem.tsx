@@ -73,7 +73,9 @@ namespace AboutItem {
             const label = this.state.isCollapsed ? "▶ Show All" : "▼ Hide All";
             return (
                 <div className="about-item-container">
-                    <button onClick={() => this.toggleAll()}>{label}</button>
+                    <a role="button" id="toggle-all-about-item" className="link-button" href="#" onClick={() => this.toggleAll()}>
+                        {label}
+                    </a>
                     {this.state.childNodes}
                 </div>
             );
@@ -88,6 +90,7 @@ class InitializeAboutItem {
     viewModel: AboutItemViewModel;
     isCollapsed: boolean = true;
     rootClassName: string;
+    elementClassName: string = "about-item-data";
 
     constructor(viewModel: AboutItemViewModel, rootClassName: string) {
         this.viewModel = viewModel;
@@ -127,7 +130,7 @@ class InitializeAboutItem {
             <Collapsible.NodeComponent
                 key={key}
                 areAllCollapsed={this.isCollapsed}
-                className={this.rootClassName}
+                className={this.elementClassName}
                 label={label}
                 body={body}
                 style={style}

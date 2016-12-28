@@ -369,11 +369,25 @@ h4.card-title{
     padding-left: 1px;
 }
 
-.collapsible-label, a.collapsible-label:hover, a.collapsible-label:active, a.collapsible-label:visited {
+.link-button, a.link-button:hover, a.link-button:active, a.link-button:visited {
     color: black;
-    text-decoration: none;
+    text-decoration: none !important;
+}
+
+.collapsible-label, a.collapsible-label:hover, a.collapsible-label:active, a.collapsible-label:visited {
+    font-size: 1.2em;
+    text-decoration: none !important;
 }
 
 .sample-response {
     margin-left: 10px;
+}
+
+.about-item-data {
+    margin: 3px 3px 0px 3px;
+    padding: 5px 5px 0px 5px;
+}
+
+#toggle-all-about-item {
+    float: right;
 }
