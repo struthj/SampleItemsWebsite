@@ -105,6 +105,12 @@ class InitializeAboutItem {
         );
     }
 
+    pushTextComponent(key: string, label: string, bodyText: string) {
+        if (label && bodyText) {
+            this.rootChildren.push(this.buildTextComponent(key, label, bodyText));
+        }
+    }
+
     buildTextComponent(key: string, label: string, bodyText: string) {
         const htmlBody = (<div>{bodyText}</div>);
         return this.buildGenericComponent(key, label, htmlBody, undefined, undefined);
@@ -131,22 +137,12 @@ class InitializeAboutItem {
     }
 
     pushTextElems() {
-        this.rootChildren.push(
-            this.buildTextComponent("item-id", "Item Id", this.viewModel.itemKey.toString())
-        );
-
-        this.rootChildren.push(
-            this.buildTextComponent("ccss", "Common Core State Standards", this.viewModel.commonCoreStandardsId)
-        );
-
-        this.rootChildren.push(
-            this.buildTextComponent("target", "Target Id", this.viewModel.targetId)
-        );
+        this.pushTextComponent("item-id", "Item Id", this.viewModel.itemKey.toString());
+        this.pushTextComponent("ccss", "Common Core State Standards", this.viewModel.commonCoreStandardsId);
+        this.pushTextComponent("target", "Target Id", this.viewModel.targetId);
 
         const grade = GradeLevels.toString(this.viewModel.grade);
-        this.rootChildren.push(
-            this.buildTextComponent("target-grade", "Target Grade", grade)
-        );
+        this.pushTextComponent("target-grade", "Target Grade", grade);
     }
 
     buildRubricEntry(rubricEntry: RubricEntry, key: string) {

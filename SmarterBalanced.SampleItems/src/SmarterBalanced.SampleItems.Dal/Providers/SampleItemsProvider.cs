@@ -45,7 +45,6 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
             SampleItemsContext context = new SampleItemsContext
             {
                 AccessibilityResourceFamilies = accessibilityResourceFamilies,
-                GlobalAccessibilityResources = globalResources, // TODO: Remove with global accessibility refactor
                 InteractionTypes = interactionTypes,
                 ItemDigests = itemDigests,
                 ItemCards = itemCards,

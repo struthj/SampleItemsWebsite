@@ -100,17 +100,25 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
 
             foreach(var content in contents)
             {
-                rubrics.Add(
-                    new Rubric
-                    {
-                        Language = content?.Language,
-                        RubricEntries = content?.RubricList?.Rubrics,
-                        Samples = content?.RubricList?.RubricSamples
-                    });
+                var rubricEntries = content?.RubricList?.Rubrics?.Where(r => !string.IsNullOrWhiteSpace(r.Value)).ToList();
+                var samples = content?.RubricList?.RubricSamples?.Where(r => r.SampleResponses.Count() > 0).ToList();
+
+                if(rubricEntries?.Count() > 0 && samples?.Count() > 0)
+                {
+                    rubrics.Add(
+                        new Rubric
+                        {
+                            Language = content?.Language,
+                            RubricEntries = rubricEntries,
+                            Samples = samples
+                        });
+                }
+
             }
 
             return rubrics;
         }
+
 
         /// <summary>
         /// Digests a collection of ItemMetadata objects and a collection of ItemContents objects into a collection of ItemDigest objects.
