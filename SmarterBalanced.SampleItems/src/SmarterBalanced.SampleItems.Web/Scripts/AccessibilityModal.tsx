@@ -1,5 +1,7 @@
 ﻿interface ModalProps {
     localAccessibility: AccessibilityResourceViewModel[];
+    updateSelection(category: string, code: string): void;
+    onSave(event: any): void;
 }
 
 interface ModalState {
@@ -22,19 +24,12 @@ class ItemAccessibilityModal extends React.Component<ModalProps, ModalState> {
         this.state = {
             localAccessibility: props.localAccessibility,
         }
+        this.resetOptions = this.resetOptions.bind(this);
+        this.props.updateSelection.bind(this);
     }
 
     resetOptions(): void {
         //Clear Cookie
-    }
-
-    saveOptions(): void {
-        //Update Cookie with current options
-    }
-
-    onChange(selection: Selection): void {
-        console.log("I got a selection!");
-        console.log(selection);
     }
 
     render() {
@@ -43,7 +38,7 @@ class ItemAccessibilityModal extends React.Component<ModalProps, ModalState> {
                 defaultSelection: res.selectedCode,
                 label: res.label,
                 selections: res.selections,
-                onChange: this.onChange
+                updateSelection: this.props.updateSelection,
             }
             return <DropDown{...ddprops} key={res.label} />;
         });
@@ -59,13 +54,15 @@ class ItemAccessibilityModal extends React.Component<ModalProps, ModalState> {
                             <h4 className="modal-title" id="myModalLabel">Accessibility Options</h4>
                         </div>
                         <div className="modal-body">
-                            <div className="accessibility-dropdowns">
-                                {dropdowns}
-                            </div>
+                            <form id="accessibility-form" onSubmit={this.props.onSave}>
+                                <div className="accessibility-dropdowns">
+                                    {dropdowns}
+                                </div>
+                            </form>
                         </div>
                         <div className="modal-footer">
-                            <button onClick={this.saveOptions} className="btn btn-primary">Update</button>
-                            <button onClick={this.resetOptions} className="btn btn-primary">Reset</button>
+                            <button className="btn btn-primary" form="accessibility-form">Update</button>
+                            <button onClick={this.resetOptions} className="btn btn-primary">Reset to Default</button>
                         </div>
                     </div>
                 </div>

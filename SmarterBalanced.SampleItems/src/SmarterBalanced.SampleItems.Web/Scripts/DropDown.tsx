@@ -9,7 +9,7 @@ interface DropdownProps {
     defaultSelection: string;
     label: string;
     selections: Selection[];
-    onChange(selection: Selection): void;
+    updateSelection(code: string, label: string): void;
 }
 
 interface DropdownState {
@@ -19,7 +19,15 @@ class DropDown extends React.Component<DropdownProps, DropdownState> {
     constructor(props: DropdownProps) {
         super(props);
         this.state = {};
+        this.onChange = this.onChange.bind(this);
     }
+
+    onChange(event: any): void {
+        console.log("I got a selection!");
+        console.log(event.target.value);
+        this.props.updateSelection(event.target.value, this.props.label);
+    }
+
     renderOption(selection: Selection) {
         return (
             <option value={selection.code}
@@ -37,7 +45,7 @@ class DropDown extends React.Component<DropdownProps, DropdownState> {
             <div className="accessibility-dropdown form-group">
                 <label>{this.props.label}</label><br/>
                 <select className="form-control"
-                    onChange={(selection) => this.props.onChange}>
+                    onChange={this.onChange}>
                     {options}
                 </select>
             </div>
