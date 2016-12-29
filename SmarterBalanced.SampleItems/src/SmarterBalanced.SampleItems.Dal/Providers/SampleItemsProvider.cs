@@ -7,41 +7,28 @@ using SmarterBalanced.SampleItems.Dal.Xml;
 using SmarterBalanced.SampleItems.Dal.Translations;
 using SmarterBalanced.SampleItems.Dal.Providers.Models;
 using SmarterBalanced.SampleItems.Dal.Configurations.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SmarterBalanced.SampleItems.Dal.Providers
 {
     public static class SampleItemsProvider
     {
-        public static async Task<SampleItemsContext> LoadContext(AppSettings appSettings)
+
+        public static async Task<SampleItemsContext> LoadContext(AppSettings appSettings, ILogger logger)
         {
-            // TODO:
-            //      - Refactor to separate method.
-            //      - Don't need Global Acccessibility in context
-            XElement accessibilityXml = XDocument
-                .Load(appSettings.SettingsConfig.AccommodationsXMLPath)
-                .Element("Accessibility");
+            List<InteractionType> interactionTypes;
+            List<InteractionFamily> interactionFamilies;
 
-            List<AccessibilityResource> globalResources = accessibilityXml
-                                                          .Element("MasterResourceFamily")
-                                                          .Elements("SingleSelectResource")
-                                                          .ToAccessibilityResources().ToList();
+            Task<XElement> interactionTypeDoc = XmlSerialization.GetXDocumentElementAsync(appSettings.SettingsConfig.InteractionTypesXMLPath, "InteractionTypes");
+            Task<XElement> accessibilityDoc = XmlSerialization.GetXDocumentElementAsync(appSettings.SettingsConfig.AccommodationsXMLPath, "Accessibility");
+            Task<XDocument> subjectDoc = XmlSerialization.GetXDocumentAsync(appSettings.SettingsConfig.ClaimsXMLPath);
 
-            IList<AccessibilityResourceFamily> accessibilityResourceFamilies = accessibilityXml
-                                                          .Elements("ResourceFamily")
-                                                          .ToAccessibilityResourceFamilies(globalResources).ToList();
-
-            // TODO: Refactor to method. is List<InteractionType> needed in the context?
-            XElement interactionTypesDoc = XDocument
-                .Load(appSettings.SettingsConfig.InteractionTypesXMLPath)
-                .Element("InteractionTypes");
-            List<InteractionType> interactionTypes = interactionTypesDoc.Element("Items").Elements("Item").ToInteractionTypes();
-            List<InteractionFamily> interactionFamily = interactionTypesDoc.ToInteractionFamilies();
-
-            List<Subject> subjects = XDocument.Load(appSettings.SettingsConfig.ClaimsXMLPath).ToSubjects(interactionFamily);
+            IList<AccessibilityResourceFamily> accessibilityResourceFamilies = LoadAccessibility(accessibilityDoc.Result);
+            GetInteractionTypes(interactionTypeDoc.Result, out interactionTypes, out interactionFamilies);
+            List<Subject> subjects = subjectDoc.Result.ToSubjects(interactionFamilies);
 
             List<ItemDigest> itemDigests = await LoadItemDigests(appSettings, accessibilityResourceFamilies, interactionTypes, subjects);
             List<ItemCardViewModel> itemCards = itemDigests.Select(i => i.ToItemCardViewModel()).ToList();
-
             SampleItemsContext context = new SampleItemsContext
             {
                 AccessibilityResourceFamilies = accessibilityResourceFamilies,
@@ -51,6 +38,9 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
                 AppSettings = appSettings,
                 Subjects = subjects
             };
+
+            logger.LogInformation($"Loaded {itemDigests.Count()} item digests");
+            logger.LogInformation($"Context loaded successfully");
 
             return context;
         }
@@ -82,10 +72,24 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
                     accessibilityResourceFamilies,
                     interactionTypes,
                     subjects)
-                .ToList();
+                .Where(i => i.Grade != GradeLevels.NA).ToList();
 
             return itemDigests;
         }
 
+        private static IList<AccessibilityResourceFamily> LoadAccessibility(XElement accessibilityXml)
+        {
+
+            List<AccessibilityResource> globalResources = accessibilityXml.Element("MasterResourceFamily")
+                                                          .Elements("SingleSelectResource").ToAccessibilityResources().ToList();
+            return accessibilityXml.Elements("ResourceFamily")
+                     .ToAccessibilityResourceFamilies(globalResources).ToList();
+        }
+
+        private static void GetInteractionTypes(XElement interactionTypesDoc, out List<InteractionType> interactionTypes, out List<InteractionFamily> interactionFamily)
+        {
+            interactionTypes = interactionTypesDoc.Element("Items").Elements("Item").ToInteractionTypes();
+            interactionFamily = interactionTypesDoc.ToInteractionFamilies();
+        }
     }
 }
