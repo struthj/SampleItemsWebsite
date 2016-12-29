@@ -64,8 +64,8 @@
             }
 
             return (
-                <div className={this.props.className} style={this.props.style} aria-expanded={!this.state.isCollapsed} tabIndex={0}>
-                    <a role="button" className="collapsible-label link-button" href="#" onClick={() => this.toggleCollapse()}>
+                <div className={this.props.className} style={this.props.style} aria-expanded={!this.state.isCollapsed}>
+                    <a role="button" className="collapsible-label link-button" href="#" onClick={() => this.toggleCollapse()} tabIndex={0}>
                         {label}
                     </a>
                     <div className="collapsible-body" style={style} aria-hidden={this.state.isCollapsed}>

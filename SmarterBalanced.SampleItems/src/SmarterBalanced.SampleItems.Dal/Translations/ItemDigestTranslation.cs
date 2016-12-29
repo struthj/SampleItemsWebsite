@@ -24,7 +24,6 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
         public static ItemDigest ItemToItemDigest(
             ItemMetadata itemMetadata,
             ItemContents itemContents,
-            IList<AccessibilityResourceFamily> resourceFamilies,
             IList<InteractionType> interactionTypes,
             IList<Subject> subjects
             )
@@ -80,7 +79,8 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
 
             digest.Grade = GradeLevelsUtils.FromString(itemMetadata.Metadata.Grade);
 
-            digest.AccessibilityResources = resourceFamilies.FirstOrDefault(t => t.Subjects.Any(c => c == subjectId) && t.Grades.Contains(digest.Grade))?.Resources;
+            digest.AslSupported = itemMetadata.Metadata.AccessibilityTagsASLLanguage == "Y" ? true : false;
+            digest.AllowCalculator = itemMetadata.Metadata.AllowCalculator == "Y" ? true : false;
 
             return digest;
         }
@@ -113,12 +113,10 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
                             Samples = samples
                         });
                 }
-
             }
 
             return rubrics;
         }
-
 
         /// <summary>
         /// Digests a collection of ItemMetadata objects and a collection of ItemContents objects into a collection of ItemDigest objects.
@@ -142,7 +140,11 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
 
                 if (itemsCount == 1)
                 {
-                    digests.Add(ItemToItemDigest(metadata, matchingItems.First(), resourceFamilies, interactionTypes, subjects));
+                    ItemDigest itemDigest = ItemToItemDigest(metadata, matchingItems.First(), interactionTypes, subjects);
+
+                    AssignAccessibilityResources(itemDigest, resourceFamilies);
+
+                    digests.Add(itemDigest);
                 }
                 else if (itemsCount > 1)
                 {
@@ -150,7 +152,48 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
                 }
                 // TODO: log a warning if item count is 0
             });
+            
             return digests;
         }
+
+        private static void AssignAccessibilityResources(ItemDigest itemDigest, IList<AccessibilityResourceFamily> resourceFamilies)
+        {
+            List<AccessibilityResource> resources = resourceFamilies
+                .FirstOrDefault(t => t.Subjects.Any(c => c == itemDigest.Subject?.Code)
+                    && t.Grades.Contains(itemDigest.Grade)
+                )?.Resources;
+
+            if (resources == null)
+            {
+                return;
+            }
+
+            if (!itemDigest.AslSupported || !itemDigest.AllowCalculator)
+            {
+                resources = resources.Select(t => t.DeepClone()).ToList();
+
+                if (!itemDigest.AslSupported)
+                {
+                    var resource = resources.FirstOrDefault(t => t.Code == "AmericanSignLanguage");
+                    if (resource != null)
+                    {
+                        resource.Disabled = true;
+                    }
+                }
+
+                if (!itemDigest.AllowCalculator)
+                {
+                    var resource = resources.FirstOrDefault(t => t.Code == "Calculator");
+                    if (resource != null)
+                    {
+                        resource.Disabled = true;
+                    }
+                }
+            }
+
+            itemDigest.AccessibilityResources = resources;
+        }
+
     }
+
 }

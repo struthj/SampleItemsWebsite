@@ -37,5 +37,8 @@ namespace SmarterBalanced.SampleItems.Dal.Xml.Models
 
         [XmlElement("AccessibilityTagsASLLanguage")]
         public string AccessibilityTagsASLLanguage { get; set; }
+
+        [XmlElement("AllowCalculator")]
+        public string AllowCalculator { get; set; }
     }
 }

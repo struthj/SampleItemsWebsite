@@ -75,7 +75,6 @@ namespace SmarterBalanced.SampleItems.Dal.Providers
             IEnumerable<ItemMetadata> itemMetadata = await deserializeMetadata;
             IEnumerable<ItemContents> itemContents = await deserializeContents;
 
-
             var itemDigests = ItemDigestTranslation
                 .ItemsToItemDigests(
                     itemMetadata,
