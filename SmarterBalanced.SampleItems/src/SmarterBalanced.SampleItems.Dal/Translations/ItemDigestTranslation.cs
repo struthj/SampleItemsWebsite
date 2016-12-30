@@ -156,6 +156,12 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
             return digests;
         }
 
+        /// <summary>
+        /// Assigns a list of AccessibilityResources to an item digest.
+        /// If the item has auxilliary resources disabled, the resources are updated accordingly.
+        /// </summary>
+        /// <param name="itemDigest"></param>
+        /// <param name="resourceFamilies"></param>
         private static void AssignAccessibilityResources(ItemDigest itemDigest, IList<AccessibilityResourceFamily> resourceFamilies)
         {
             List<AccessibilityResource> resources = resourceFamilies
@@ -174,24 +180,30 @@ namespace SmarterBalanced.SampleItems.Dal.Translations
 
                 if (!itemDigest.AslSupported)
                 {
-                    var resource = resources.FirstOrDefault(t => t.Code == "AmericanSignLanguage");
-                    if (resource != null)
-                    {
-                        resource.Disabled = true;
-                    }
+                    DisableResource(resources, "AmericanSignLanguage");
                 }
 
                 if (!itemDigest.AllowCalculator)
                 {
-                    var resource = resources.FirstOrDefault(t => t.Code == "Calculator");
-                    if (resource != null)
-                    {
-                        resource.Disabled = true;
-                    }
+                    DisableResource(resources, "Calculator");
                 }
             }
 
             itemDigest.AccessibilityResources = resources;
+        }
+
+        /// <summary>
+        /// Disables a given resource
+        /// </summary>
+        /// <param name="resource"></param>
+        private static void DisableResource(List<AccessibilityResource> resources, string code)
+        {
+            var resource = resources.FirstOrDefault(t => t.Code == code);
+            if (resource != null)
+            {
+                resource.Disabled = true;
+                resource.Selections.ForEach(s => s.Disabled = true);
+            }
         }
 
     }
