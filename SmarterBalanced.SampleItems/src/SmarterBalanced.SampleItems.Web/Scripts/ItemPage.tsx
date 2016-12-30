@@ -68,7 +68,6 @@
         saveOptions(event: any): void {
             //Update Cookie with current options
             event.preventDefault();
-            console.log("Saved new accessibility options");
             //copy the old accessibility resource view models
             let newAccResourceVms = this.props.accResourceVMs.map(this.setSelectionValue);
 
@@ -76,7 +75,17 @@
                 resourceSelections: this.state.resourceSelections,
                 ivsAccOptions: getAccessibilityString(newAccResourceVms),
             });
-            console.log(newAccResourceVms);
+            let request = $.post({
+                url: '/Item/Update',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(newAccResourceVms),
+                success: this.cookeSaveSuccess,
+            });
+        }
+
+        cookeSaveSuccess() {
+            console.log("Success!");
         }
 
         render() {

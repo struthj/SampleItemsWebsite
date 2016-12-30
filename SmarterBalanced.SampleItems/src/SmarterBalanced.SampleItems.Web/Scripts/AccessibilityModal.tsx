@@ -61,7 +61,7 @@ class ItemAccessibilityModal extends React.Component<ModalProps, ModalState> {
                             </form>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn btn-primary" form="accessibility-form">Update</button>
+                            <button className="btn btn-primary" form="accessibility-form" data-dismiss="modal" onClick={this.props.onSave}> Update</button>
                             <button onClick={this.resetOptions} className="btn btn-primary">Reset to Default</button>
                         </div>
                     </div>

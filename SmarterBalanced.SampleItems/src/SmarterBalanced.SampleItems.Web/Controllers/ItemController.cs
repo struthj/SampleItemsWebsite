@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SmarterBalanced.SampleItems.Core.Repos;
 using SmarterBalanced.SampleItems.Core.Repos.Models;
 using System;
@@ -39,7 +40,7 @@ namespace SmarterBalanced.SampleItems.Web.Controllers
             {
                 logger.LogWarning($"{nameof(Details)} null param(s) for {bankKey} {itemKey}");
                 return BadRequest();
-            } 
+            }
 
             if (string.IsNullOrEmpty(iSAAP))
             {
@@ -55,6 +56,23 @@ namespace SmarterBalanced.SampleItems.Web.Controllers
             }
 
             return View(itemViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult Update([FromBody] AccessibilityResourceViewModel[] cookieData)
+        {
+            string cookieName = repo.AppSettings.SettingsConfig.AccessibilityCookie;
+            JsonConvert.SerializeObject(cookieData);
+            Response.Cookies.Append(cookieName, JsonConvert.SerializeObject(cookieData));
+            return Json(new { message="Success!" });
+        }
+
+        [HttpPost]
+        public IActionResult Reset()
+        {
+            string cookieName = repo.AppSettings.SettingsConfig.AccessibilityCookie;
+            Response.Cookies.Delete(cookieName);
+            throw new NotImplementedException();
         }
     }
 

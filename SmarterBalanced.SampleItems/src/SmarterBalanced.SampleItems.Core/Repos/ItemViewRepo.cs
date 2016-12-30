@@ -64,29 +64,55 @@ namespace SmarterBalanced.SampleItems.Core.Repos
             string baseUrl = context.AppSettings.SettingsConfig.ItemViewerServiceURL;
             return $"{baseUrl}/item/{digest.BankKey}-{digest.ItemKey}";
         }
-        
+
+        private List<AccessibilityResourceViewModel> setAccessibilityFromCookie(AccessibilityResourceViewModel[] cookiePreferences, List<AccessibilityResourceViewModel> defaultPreferences)
+        {
+            List<AccessibilityResourceViewModel> computedResources = new List<AccessibilityResourceViewModel>();
+
+            //Use the defaults for any disabled accessibility resources
+            computedResources = defaultPreferences.Where(r => r.Disabled).ToList();
+
+            var disputedResources = defaultPreferences.Where(r => !r.Disabled);
+
+            //Enabled resources
+            foreach(AccessibilityResourceViewModel res in disputedResources)
+            {
+                var userPref = cookiePreferences.Where(p => p.Label == res.Label).FirstOrDefault();
+                var selected = userPref.Selections.Where(c => c.Code == userPref.SelectedCode).FirstOrDefault();
+                if (!selected.Disabled)
+                {
+                    res.SelectedCode = userPref.SelectedCode;
+                }
+                computedResources.Add(res);
+            }
+
+            return computedResources;
+        }
+
         /// <returns>
         /// An ItemViewModel instance, or null if no item exists with
         /// the given combination of bankKey and itemKey.
         /// </returns>
-        public ItemViewModel GetItemViewModel(int bankKey, int itemKey, string iSAAP = null)
+        public ItemViewModel GetItemViewModel(int bankKey, int itemKey, string iSAAP = null,
+            AccessibilityResourceViewModel[] cookiePreferences = null)
         {
             iSAAP = iSAAP ?? string.Empty;
             ItemDigest itemDigest = GetItemDigest(bankKey, itemKey);
             if (itemDigest == null)
+            {
                 return null;
-            
-            var viewerUrl = GetItemViewerUrl(itemDigest);
-            var accResourceVMs = itemDigest.AccessibilityResources.ToAccessibilityResourceViewModels(iSAAP);
-            var filteredVMs = accResourceVMs
-                .Where(t => !t.Disabled && !t.Selections.All(s => s.Disabled))
-                .ToList();
+            }
+            var accResources = itemDigest.AccessibilityResources.ToAccessibilityResourceViewModels(iSAAP);
+            if ( (cookiePreferences != null) && (iSAAP == string.Empty))
+            {
+                accResources = setAccessibilityFromCookie(cookiePreferences, accResources);
+            }
 
             var itemView = new ItemViewModel
             {
                 ItemDigest = itemDigest,
                 ItemViewerServiceUrl = GetItemViewerUrl(itemDigest),
-                AccResourceVMs = filteredVMs
+                AccResourceVMs = accResources
             };
 
             return itemView;

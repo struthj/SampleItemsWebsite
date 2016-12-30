@@ -11,6 +11,7 @@ namespace SmarterBalanced.SampleItems.Core.Repos
     {
         AppSettings AppSettings { get; }
 
-        ItemViewModel GetItemViewModel(int bankKey, int itemKey, string iSAAPCode = null);
+        ItemViewModel GetItemViewModel(int bankKey, int itemKey, string iSAAPCode = null,
+            AccessibilityResourceViewModel[] cookiePreferences = null);
     }
 }
